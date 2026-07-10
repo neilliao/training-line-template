@@ -1,0 +1,20 @@
+# 機密
+.env
+serviceAccountKey.json
+serviceAccountKey.json.json
+
+# 暫存測試檔
+_preview.py
+_send_preview.py
+
+# Log
+logs/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.DS_Store
+.vercel
+.gstack/
+.pytest_cache/

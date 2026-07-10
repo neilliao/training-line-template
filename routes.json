@@ -1,0 +1,24 @@
+{
+  "_note": "跑步路線庫範例（路段模型）。河濱型路線=一維數線：每個地標釘『沿河里程 km』，原點=0、一方向為正另一方向為負；任兩節點距離=里程差絕對值，來回×2，多段串接=各段相加。corridors=線性河濱；loops=繞圈；tracks=田徑場(間歇,不辨識路線)；other=尚未節點化的零散段。source: anchor|watch|geocode|self_report|estimate|measured。維護用 route_log.py（--list/--scan/--plan/--between）。請把以下範例換成你自己的常跑路線。",
+  "corridors": [
+    {
+      "name": "河濱範例路線",
+      "type": "linear",
+      "origin": "起點橋",
+      "region": "範例區",
+      "nodes": [
+        {"name": "起點橋", "km": 0.0, "source": "anchor"},
+        {"name": "水門", "km": 1.5, "source": "geocode"},
+        {"name": "補水站", "km": 2.0, "source": "self_report"},
+        {"name": "折返公園", "km": 5.0, "source": "estimate"}
+      ]
+    }
+  ],
+  "loops": [
+    {"name": "公園外圈範例", "loop_km": 2.0, "region": "範例區", "source": "self_report"}
+  ],
+  "tracks": [
+    {"name": "田徑場範例(主場)", "loop_km": 0.4, "region": "範例區"}
+  ],
+  "other": []
+}

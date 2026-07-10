@@ -1,0 +1,40 @@
+name: Daily Reminder - 每日課表提醒
+
+on:
+  schedule:
+    - cron: "0 22 * * *"   # UTC 22:00 = 台北 06:00
+  workflow_dispatch:
+
+# 防止 runner 積壓時跨日重複推播（cancel:false → 排隊）
+concurrency:
+  group: training-daily-reminder
+  cancel-in-progress: false
+
+jobs:
+  remind:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: 安裝套件
+        run: pip install -r requirements.txt
+
+      - name: 執行每日教練卡
+        env:
+          TZ: Asia/Taipei
+          LINE_CHANNEL_ACCESS_TOKEN:   ${{ secrets.LINE_CHANNEL_ACCESS_TOKEN }}
+          LINE_CHANNEL_SECRET:         ${{ secrets.LINE_CHANNEL_SECRET }}
+          LINE_USER_ID:                ${{ secrets.LINE_USER_ID }}
+          FIREBASE_CREDENTIALS_JSON:   ${{ secrets.FIREBASE_CREDENTIALS_JSON }}
+          FIREBASE_PROJECT_ID:         ${{ secrets.FIREBASE_PROJECT_ID }}
+          ANTHROPIC_API_KEY:           ${{ secrets.ANTHROPIC_API_KEY }}
+          WELLNESS_COACH_API:          ${{ secrets.WELLNESS_COACH_API }}
+          WELLNESS_COACH_TOKEN:        ${{ secrets.WELLNESS_COACH_TOKEN }}
+        run: python daily_reminder.py

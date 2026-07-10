@@ -1,0 +1,8 @@
+requests
+firebase-admin
+python-dotenv
+flask
+line-bot-sdk
+anthropic
+opencc-python-reimplemented
+garth
