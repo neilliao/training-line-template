@@ -94,6 +94,8 @@ Firebase Firestore（資料庫）
 
 ## 安裝教學
 
+> 📖 **第一次部署請看保母級教學：[docs/SETUP.md](./docs/SETUP.md)** —— 每一步去哪裡點什麼都有寫，含驗收檢查點與疑難排解，不需要寫程式。以下是給熟手的濃縮版。
+
 ### 事前準備：申請你自己的帳號與金鑰
 
 1. **intervals.icu**：註冊並連結你的 Garmin / Strava / Wahoo。Settings → API 取得 `API Key`；`Athlete ID` 在個人頁網址（`i` 開頭那串）
