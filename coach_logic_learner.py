@@ -236,7 +236,11 @@ def compute_stats(weeks: list) -> dict:
 
 def _fetch_coach_history_weeks(db) -> list:
     """讀全部 coach_history docs，排除 GAP 標記列與缺 week_start 的髒資料，
-    依 week_start 升冪排序回傳。"""
+    依 week_start 升冪排序回傳。
+
+    ⚠ 全掃整個集合，只准在「確定要重新學習」後呼叫；每輪 poll 的變化偵測
+    用 _latest_week_start()（limit 查詢）。全掃 × 每 5 分鐘 poll 一天可燒
+    數萬 reads，會把 Firestore Spark 免費額度（50k reads/日）打爆。"""
     docs = db.collection(COACH_HISTORY_COLLECTION).stream()
     weeks = []
     for d in docs:
@@ -246,6 +250,20 @@ def _fetch_coach_history_weeks(db) -> list:
         weeks.append(row)
     weeks.sort(key=lambda r: r["week_start"])
     return weeks
+
+
+def _latest_week_start(db):
+    """便宜查最新一週 week_start（排除 GAP 標記列），供每輪 poll 變化偵測。
+    limit 8 足以涵蓋零星 GAP 列；查不到有效列回 None（呼叫端視同無資料）。"""
+    from firebase_admin import firestore
+    docs = (db.collection(COACH_HISTORY_COLLECTION)
+            .order_by("week_start", direction=firestore.Query.DESCENDING)
+            .limit(8).stream())
+    for d in docs:
+        row = d.to_dict() or {}
+        if row.get("source") != "GAP" and row.get("week_start"):
+            return row["week_start"]
+    return None
 
 
 # ── LLM：質性摘要與展望（複用 ai_analyzer 的呼叫模式）─────────────────
@@ -437,18 +455,25 @@ def maybe_relearn(force: bool = False) -> bool:
     try:
         import firebase_client as fb
         db = fb._init()
+
+        # 先便宜比對（1 筆 state + limit 8 查詢），沒新週就結束——
+        # 不准每輪 poll 全掃歷史（見 _fetch_coach_history_weeks 註解）
+        if not force:
+            latest = _latest_week_start(db)
+            if latest is None:
+                print("[coach_logic_learner] coach_history 目前沒有資料，略過")
+                return False
+            state_snap = db.collection(META_COLLECTION).document(STATE_DOC).get()
+            last_learned = state_snap.to_dict().get("based_on_latest_week") if state_snap.exists else None
+            if last_learned == latest:
+                print(f"[coach_logic_learner] 最新一週 {latest} 沒變化，略過重新學習")
+                return False
+
         weeks = _fetch_coach_history_weeks(db)
         if not weeks:
             print("[coach_logic_learner] coach_history 目前沒有資料，略過")
             return False
         latest_week_start = weeks[-1]["week_start"]
-
-        if not force:
-            state_snap = db.collection(META_COLLECTION).document(STATE_DOC).get()
-            last_learned = state_snap.to_dict().get("based_on_latest_week") if state_snap.exists else None
-            if last_learned == latest_week_start:
-                print(f"[coach_logic_learner] 最新一週 {latest_week_start} 沒變化，略過重新學習")
-                return False
 
         print(f"[coach_logic_learner] 偵測到新資料（最新一週 {latest_week_start}），開始重新學習")
         return _run_relearn(db, weeks, latest_week_start)

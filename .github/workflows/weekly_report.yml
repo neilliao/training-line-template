@@ -11,7 +11,27 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  # secrets 還沒設定（template 本體、剛 fork 還沒照 docs/SETUP.md 設定）→ 綠燈跳過，
+  # 不要每週紅燈＋拿空 token 打 LINE API 吃 401
+  check-config:
+    runs-on: ubuntu-latest
+    outputs:
+      configured: ${{ steps.cfg.outputs.configured }}
+    steps:
+      - id: cfg
+        env:
+          LINE_TOKEN: ${{ secrets.LINE_CHANNEL_ACCESS_TOKEN }}
+        run: |
+          if [ -n "$LINE_TOKEN" ]; then
+            echo "configured=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "configured=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::尚未設定 LINE secrets，略過週報（照 docs/SETUP.md 設定後自動啟用）"
+          fi
+
   report:
+    needs: check-config
+    if: needs.check-config.outputs.configured == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 5
 

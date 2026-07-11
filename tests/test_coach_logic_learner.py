@@ -367,6 +367,22 @@ class _FakeDocRef:
             coll[self._doc_id] = dict(data)
 
 
+class _FakeQuery:
+    def __init__(self, snaps):
+        self._snaps = snaps
+
+    def order_by(self, field, direction=None):
+        reverse = "DESC" in str(direction or "").upper()
+        return _FakeQuery(sorted(
+            self._snaps, key=lambda s: s.to_dict().get(field, ""), reverse=reverse))
+
+    def limit(self, n):
+        return _FakeQuery(self._snaps[:n])
+
+    def stream(self):
+        return list(self._snaps)
+
+
 class _FakeCollectionRef:
     def __init__(self, store, name):
         self._store = store
@@ -377,6 +393,9 @@ class _FakeCollectionRef:
 
     def stream(self):
         return [_FakeSnap(doc_id, data) for doc_id, data in self._store.get(self._name, {}).items()]
+
+    def order_by(self, field, direction=None):
+        return _FakeQuery(self.stream()).order_by(field, direction=direction)
 
 
 class _FakeDB:
@@ -413,6 +432,22 @@ def test_maybe_relearn_skips_llm_when_latest_week_unchanged(monkeypatch):
     monkeypatch.setattr(learner, "generate_logic_update", fake_gen)
     assert learner.maybe_relearn() is False
     assert called["n"] == 0  # 沒新週，LLM 呼叫要錢，不該打
+
+
+def test_maybe_relearn_no_full_scan_when_latest_week_unchanged(monkeypatch):
+    """沒新週時不准全掃 coach_history（全掃 × 每 5 分鐘 poll 會把 Firestore
+    Spark 免費 50k reads/日 打爆）。"""
+    store = {
+        "coach_history": {"2026-07-06": {"week_start": "2026-07-06", "source": "firebase"}},
+        "_meta": {"coach_logic_state": {"based_on_latest_week": "2026-07-06"}},
+    }
+    _install_fake_firebase(monkeypatch, store)
+
+    def boom(db):
+        raise AssertionError("沒新週不該呼叫 _fetch_coach_history_weeks 全掃")
+
+    monkeypatch.setattr(learner, "_fetch_coach_history_weeks", boom)
+    assert learner.maybe_relearn() is False
 
 
 def test_maybe_relearn_triggers_and_writes_on_new_week(monkeypatch):
