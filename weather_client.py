@@ -421,7 +421,7 @@ def forecast_bundle(lat: float = None, lon: float = None, days: int = 3) -> dict
     失敗回 {"weather_text": "", "today": {}}（不阻斷卡片）。
     帶 lat/lon 時，AQI 也會改挑該座標最近的測站。"""
     _explicit_loc = lat is not None and lon is not None
-    lat = lat or 25.0579   # 松山（原作者 常用區）
+    lat = lat or 25.0579   # 預設座標（台北松山，範例值）
     lon = lon or 121.5673
     try:
         resp = requests.get(OPEN_METEO_FORECAST_URL, params={
@@ -560,7 +560,7 @@ MOENV_AQI_URL = "https://data.moenv.gov.tw/api/v2/aqx_p_432"
 
 def get_aqi(site: str = "士林", county: str = "臺北市",
             lat: float = None, lon: float = None) -> dict:
-    """取即時 AQI。預設士林站（原作者 河濱主場）；帶 lat/lon 時改抓全台挑最近測站。
+    """取即時 AQI。預設士林站（範例測站）；帶 lat/lon 時改抓全台挑最近測站。
     失敗回 {}（不阻斷）。"""
     api_key = os.getenv("MOENV_API_KEY", "")
     if not api_key:

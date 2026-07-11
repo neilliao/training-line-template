@@ -65,7 +65,7 @@ def _iv(t, dist, moving, elapsed, hr):
             "elapsed_time": elapsed, "average_heartrate": hr}
 
 
-# 2026-07-09 松山區間歇（i164172593）icu_intervals 實資料：
+# 某次間歇課 icu_intervals 實資料範例：
 # 實跑 400/200/走200/400/200/走200/1000(休5分)/200x6，icu 把走路段標成 WORK、
 # 把 1000 拆成 400+400+200 三個連續 lap。
 REAL_20260709 = [

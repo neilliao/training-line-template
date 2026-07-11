@@ -4,7 +4,9 @@
 
 一句話：**把「教練課表 × 訓練數據 × 天氣 × 身體狀態」全部收進 LINE 一個入口。**
 
-這是 template repo：點右上角 **Use this template** 建立你自己的副本，填入你自己的金鑰即可運作。所有服務都有免費方案，唯一按用量計費的是 AI 分析（每月不到 $1 美元）。
+這是 template repo：點右上角 **Use this template** 建立你自己的副本，填入你自己的金鑰即可運作。
+
+> 💡 **想要 Bot＋網頁儀表板一次部署**：改用合體版 [run-coach-template](https://github.com/neilliao/run-coach-template)（一個 repo、一組金鑰、互通零設定）。本 repo 是「只要 LINE Bot」的獨立版。所有服務都有免費方案，唯一按用量計費的是 AI 分析（每月不到 $1 美元）。
 
 ---
 

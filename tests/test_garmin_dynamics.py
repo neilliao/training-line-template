@@ -6,7 +6,7 @@ import garmin_dynamics as gd
 
 
 RAW = {
-    "activityId": 23535187319,
+    "activityId": 12345678901,
     "startTimeLocal": "2026-07-05 06:21:13",
     "distance": 42665.0,
     "avgGroundContactTime": 270.9,
@@ -91,15 +91,15 @@ def test_dynamics_for_activity_happy_path():
 # ── impactLoad（真實衝擊負荷，2026-07-10 新增） ──
 
 def test_fetch_impact_load_converts_meters_to_km(monkeypatch):
-    """實測值：activityId=23535187319，summaryDTO.impactLoad=7540 → 7.54km（與
+    """實測值：activityId=12345678901，summaryDTO.impactLoad=7540 → 7.54km（與
     Garmin app「衝擊負荷因素」圖表顯示的 7.54 公里吻合）。"""
     class FakeClient:
         def connectapi(self, path, **kwargs):
-            assert path == "/activity-service/activity/23535187319"
+            assert path == "/activity-service/activity/12345678901"
             return {"summaryDTO": {"impactLoad": 7540.0}}
 
     monkeypatch.setattr(gd, "_garth_client", lambda: FakeClient())
-    assert gd.fetch_impact_load(23535187319) == 7.54
+    assert gd.fetch_impact_load(12345678901) == 7.54
 
 
 def test_fetch_impact_load_missing_field_returns_none(monkeypatch):
@@ -108,12 +108,12 @@ def test_fetch_impact_load_missing_field_returns_none(monkeypatch):
             return {"summaryDTO": {}}
 
     monkeypatch.setattr(gd, "_garth_client", lambda: FakeClient())
-    assert gd.fetch_impact_load(23535187319) is None
+    assert gd.fetch_impact_load(12345678901) is None
 
 
 def test_fetch_impact_load_no_client_returns_none(monkeypatch):
     monkeypatch.setattr(gd, "_garth_client", lambda: None)
-    assert gd.fetch_impact_load(23535187319) is None
+    assert gd.fetch_impact_load(12345678901) is None
 
 
 def test_fetch_impact_load_no_activity_id_returns_none():
@@ -127,12 +127,12 @@ def test_fetch_impact_load_api_error_returns_none(monkeypatch):
             raise RuntimeError("boom")
 
     monkeypatch.setattr(gd, "_garth_client", lambda: FakeClient())
-    assert gd.fetch_impact_load(23535187319) is None
+    assert gd.fetch_impact_load(12345678901) is None
 
 
 def test_dynamics_for_activity_merges_impact_load_km(monkeypatch):
     """dynamics_for_activity 找到配對的 Garmin 活動後，應併入 impactLoadKm。"""
-    monkeypatch.setattr(gd, "fetch_impact_load", lambda act_id: 7.54 if act_id == 23535187319 else None)
+    monkeypatch.setattr(gd, "fetch_impact_load", lambda act_id: 7.54 if act_id == 12345678901 else None)
     dyn = gd.dynamics_for_activity("2026-07-05", 42.67, garmin_acts=[RAW])
     assert dyn["impactLoadKm"] == 7.54
 
