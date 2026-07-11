@@ -78,6 +78,8 @@ Firebase Firestore（資料庫）
 
 > 沒有 Garmin 也可以：intervals.icu 支援 Strava / Wahoo / Coros / Polar 等來源。
 
+> **選配搭檔**：[wellness-dashboard-template](https://github.com/neilliao/wellness-dashboard-template) 是本 Bot 的網頁儀表板端（體能趨勢／跑姿／恢復／傷害風險）。部署後把 `WELLNESS_COACH_API` / `WELLNESS_COACH_TOKEN` 指過去，教練卡與深度分析就會接上身體數據。
+
 ### 使用的服務
 
 | 服務 | 用途 | 費用 |
